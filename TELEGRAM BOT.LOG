@@ -1,0 +1,11 @@
+[12/10/2025 12:02:43 AM:pyrogram.dispatcher:376:ERROR] list index out of range
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\pyrogram\dispatcher.py", line 363, in handler_worker
+    await handler.callback(self.client, *args)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\site-packages\pyrogram\handlers\message_handler.py", line 154, in resolve_future_or_callback
+    await self.original_callback(client, message, *args)
+  File "D:\VJ-FILTER-BOT\plugins\commands.py", line 83, in start
+    photo=random.choice(PICS),
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python310\lib\random.py", line 378, in choice
+    return seq[self._randbelow(len(seq))]
+IndexError: list index out of range
