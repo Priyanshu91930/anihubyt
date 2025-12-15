@@ -1348,9 +1348,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
         size = get_size(files["file_size"])
         f_caption = files["caption"]
         settings = await get_settings(query.message.chat.id)
+        # Filter out @ mentions from filename
+        clean_title = ' '.join(filter(lambda x: not x.startswith('@'), title.split())) if title else title
         if CUSTOM_FILE_CAPTION:
             try:
-                f_caption = CUSTOM_FILE_CAPTION.format(file_name='' if title is None else title,
+                f_caption = CUSTOM_FILE_CAPTION.format(file_name='' if clean_title is None else f"@anihubyt25 {clean_title}",
                                                        file_size='' if size is None else size,
                                                        file_caption='' if f_caption is None else f_caption)
             except Exception as e:
@@ -1442,9 +1444,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
         size = get_size(files['file_size'])
         f_caption = files['caption']
         settings = await get_settings(query.message.chat.id)
+        # Filter out @ mentions from filename
+        clean_title = ' '.join(filter(lambda x: not x.startswith('@'), title.split())) if title else title
         if CUSTOM_FILE_CAPTION:
             try:
-                f_caption = CUSTOM_FILE_CAPTION.format(file_name='' if title is None else title,
+                f_caption = CUSTOM_FILE_CAPTION.format(file_name='' if clean_title is None else f"@anihubyt25 {clean_title}",
                                                        file_size='' if size is None else size,
                                                        file_caption='' if f_caption is None else f_caption)
             except Exception as e:
@@ -1756,7 +1760,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('Jᴏɪɴ Cʜᴀɴɴᴇʟ', url=link.invite_link),
             InlineKeyboardButton("Vɪᴇᴡ Sᴛᴀᴛᴜs", url=f"{query.message.link}")
         ],[
-            InlineKeyboardButton("Rᴇᴏ̨ᴜᴇsᴛ Gʀᴏᴜᴘ Lɪɴᴋ", url="https://t.me/vj_bots")
+            InlineKeyboardButton("Rᴇᴏ̨ᴜᴇsᴛ Gʀᴏᴜᴘ Lɪɴᴋ", url="https://t.me/+mNAb8rPxt0EyMjU9")
         ]]
         if query.from_user.id in ADMINS:
             user = await client.get_users(from_user)
