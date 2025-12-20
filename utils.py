@@ -606,16 +606,38 @@ async def check_verification(bot, userid):
     
     tz = pytz.timezone('Asia/Kolkata')
     today = date.today()
+    validity_hours = verify_settings.get('validity_hours', 24)
+    
+    # Check in-memory VERIFIED dict first (for performance)
     if user.id in VERIFIED.keys():
         EXP = VERIFIED[user.id]
         years, month, day = EXP.split('-')
         comp = date(int(years), int(month), int(day))
-        if comp<today:
+        if comp < today:
             return False
         else:
             return True
-    else:
-        return False  
+    
+    # If not in memory, check database (important for bot restarts)
+    verified_users = await db.get_verified_users()
+    for verified_user in verified_users:
+        if verified_user['user_id'] == user.id:
+            # Found in database, check if still valid
+            verified_date = datetime.strptime(verified_user['verified_date'], '%Y-%m-%d')
+            current_time = datetime.now()
+            time_diff = current_time - verified_date
+            
+            # Check if verification is still valid based on validity_hours
+            if time_diff.total_seconds() < (validity_hours * 3600):
+                # Still valid! Add back to in-memory dict for faster future checks
+                VERIFIED[user.id] = verified_user['verified_date']
+                return True
+            else:
+                # Expired
+                return False
+    
+    # Not verified at all
+    return False  
     
 async def send_all(bot, userid, files, ident, chat_id, user_name, query):
     # Check verification first  
