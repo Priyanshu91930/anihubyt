@@ -1082,9 +1082,33 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
                 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
-    # Exclude retry_search callbacks - let dedicated handler process them
+    # Handle retry_search callbacks directly here
     if query.data.startswith("retry_search#"):
-        return
+        try:
+            _, user_id_str, search_encoded = query.data.split("#")
+            user_id = int(user_id_str)
+            
+            # Check if this is the right user clicking the button
+            if query.from_user.id != user_id:
+                return await query.answer("⚠️ This button is not for you!", show_alert=True)
+            
+            # Check if user is now verified
+            if not await check_verification(client, user_id):
+                return await query.answer("⚠️ Please verify first before trying again!", show_alert=True)
+            
+            # User is verified! Just delete this message
+            await query.answer("✅ Verified! Now search again in the group.", show_alert=False)
+            
+            # Delete the verification message
+            try:
+                await query.message.delete()
+            except:
+                pass
+            return
+        except Exception as e:
+            logger.error(f"Error in retry_search: {e}")
+            await query.answer("⚠️ Something went wrong. Please search again.", show_alert=True)
+            return
     
     # Handle verify panel callbacks
     if query.data.startswith("vp_"):
