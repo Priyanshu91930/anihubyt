@@ -2698,7 +2698,7 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
                     InlineKeyboardButton("✅ Click Here To Verify", url=verify_url)
                 ]]
                 # Add tutorial button with the specified URL
-                tutorial_url = "https://t.me/premiumcollection467832_bot?start=Z2V0LTUxMDg2MDAzMDk1MDQ3NQ"
+                tutorial_url = "https://t.me/tutorialanihub_bot?start=BQADAQADFAsAApwBOUbG8370F94H9RYE"
                 btn.append([InlineKeyboardButton("📖 Tutorial", url=tutorial_url)])
                 # Add retry button to delete message and prompt user to search in group
                 btn.append([InlineKeyboardButton("🔄 Try Again", callback_data=f"retry_search#{user_id}#{search_encoded}")])
