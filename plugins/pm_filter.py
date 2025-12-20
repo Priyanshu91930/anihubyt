@@ -3451,7 +3451,11 @@ async def refresh_vp_panel(client, message):
         [InlineKeyboardButton("🔄 Refresh", callback_data="vp_refresh"), InlineKeyboardButton("❌ Close", callback_data="close_data")]
     ]
     
-    await message.edit_text(text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=enums.ParseMode.HTML)
+    try:
+        await message.edit_text(text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=enums.ParseMode.HTML)
+    except MessageNotModified:
+        # Message content is the same, no need to edit
+        pass
 
 
 async def show_vp_users(client, query, page):
