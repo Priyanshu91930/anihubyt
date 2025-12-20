@@ -585,13 +585,18 @@ async def verify_user(bot, userid, token):
         await db.add_user(user.id, user.first_name)
         await bot.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(user.id, user.mention))
     TOKENS[user.id] = {token: True}
+    
+    # Store full datetime with timestamp, not just date
     tz = pytz.timezone('Asia/Kolkata')
-    today = date.today()
-    VERIFIED[user.id] = str(today)
+    now = datetime.now(tz)
+    verified_datetime_str = now.strftime('%Y-%m-%d %H:%M:%S')
+    
+    # Store in memory
+    VERIFIED[user.id] = verified_datetime_str
     
     # Also store in database for admin panel
     username = user.username if user.username else user.first_name
-    await db.add_verified_user(user.id, username, str(today))
+    await db.add_verified_user(user.id, username, verified_datetime_str)
 
 async def check_verification(bot, userid):
     user = await bot.get_users(userid)
@@ -610,30 +615,57 @@ async def check_verification(bot, userid):
     
     # Check in-memory VERIFIED dict first (for performance)
     if user.id in VERIFIED.keys():
-        EXP = VERIFIED[user.id]
-        years, month, day = EXP.split('-')
-        comp = date(int(years), int(month), int(day))
-        if comp < today:
+        verified_str = VERIFIED[user.id]
+        
+        # Handle both formats: "YYYY-MM-DD HH:MM:SS" (new) and "YYYY-MM-DD" (legacy)
+        try:
+            if ' ' in verified_str:  # New format with timestamp
+                verified_datetime = datetime.strptime(verified_str, '%Y-%m-%d %H:%M:%S')
+                current_time = datetime.now()
+                time_diff = current_time - verified_datetime
+                
+                # Check if still valid based on hours
+                if time_diff.total_seconds() < (validity_hours * 3600):
+                    return True
+                else:
+                    return False
+            else:  # Legacy format (just date)
+                years, month, day = verified_str.split('-')
+                comp = date(int(years), int(month), int(day))
+                if comp < today:
+                    return False
+                else:
+                    return True
+        except:
             return False
-        else:
-            return True
     
     # If not in memory, check database (important for bot restarts)
     verified_users = await db.get_verified_users()
     for verified_user in verified_users:
         if verified_user['user_id'] == user.id:
             # Found in database, check if still valid
-            verified_date = datetime.strptime(verified_user['verified_date'], '%Y-%m-%d')
-            current_time = datetime.now()
-            time_diff = current_time - verified_date
+            verified_str = verified_user['verified_date']
             
-            # Check if verification is still valid based on validity_hours
-            if time_diff.total_seconds() < (validity_hours * 3600):
-                # Still valid! Add back to in-memory dict for faster future checks
-                VERIFIED[user.id] = verified_user['verified_date']
-                return True
-            else:
-                # Expired
+            # Handle both formats
+            try:
+                if ' ' in verified_str:  # New format with timestamp
+                    verified_datetime = datetime.strptime(verified_str, '%Y-%m-%d %H:%M:%S')
+                else:  # Legacy format - assume midnight
+                    verified_datetime = datetime.strptime(verified_str, '%Y-%m-%d')
+                
+                current_time = datetime.now()
+                time_diff = current_time - verified_datetime
+                
+                # Check if verification is still valid based on validity_hours
+                if time_diff.total_seconds() < (validity_hours * 3600):
+                    # Still valid! Add back to in-memory dict for faster future checks
+                    VERIFIED[user.id] = verified_user['verified_date']
+                    return True
+                else:
+                    # Expired
+                    return False
+            except:
+                # If parsing fails, consider not verified
                 return False
     
     # Not verified at all
