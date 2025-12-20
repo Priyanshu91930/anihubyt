@@ -2626,9 +2626,11 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
                 verify_url = await get_token(client, user_id, f"https://telegram.me/{temp.U_NAME}?start=")
                 btn = [[
                     InlineKeyboardButton("✅ Click Here To Verify", url=verify_url)
-                ],[
-                    InlineKeyboardButton("ℹ️ How To Verify", url=VERIFY_TUTORIAL)
                 ]]
+                # Only add tutorial button if VERIFY_TUTORIAL is configured
+                if VERIFY_TUTORIAL:
+                    btn.append([InlineKeyboardButton("ℹ️ How To Verify", url=VERIFY_TUTORIAL)])
+                
                 await reply_msg.edit_text(
                     text="<b>🔐 You Need To Verify First!\n\n✅ Click the button below to verify and see search results.\n\n⏰ After verification, search again to get files.</b>",
                     reply_markup=InlineKeyboardMarkup(btn),

@@ -518,9 +518,11 @@ Buy subscription for ad-free direct files!
             if not await check_verification(client, user):
                 btn = [[ 
                     InlineKeyboardButton("✅ Click Here To Verify", url=await get_token(client, user, f"https://telegram.me/{temp.U_NAME}?start="))
-                ],[
-                    InlineKeyboardButton("ℹ️ How To Verify", url=VERIFY_TUTORIAL)
                 ]]
+                # Only add tutorial button if VERIFY_TUTORIAL is configured
+                if VERIFY_TUTORIAL:
+                    btn.append([InlineKeyboardButton("ℹ️ How To Verify", url=VERIFY_TUTORIAL)])
+                
                 await message.reply_text(
                     text="<b>🔐 You Need To Verify First!\n\n✅ Click the button below to verify and get your files.\n\n⏰ After verification, click on the file button again.</b>",
                     reply_markup=InlineKeyboardMarkup(btn),
