@@ -1082,6 +1082,10 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
                 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
+    # Exclude retry_search callbacks - let dedicated handler process them
+    if query.data.startswith("retry_search#"):
+        return
+    
     # Handle verify panel callbacks
     if query.data.startswith("vp_"):
         if query.from_user.id not in ADMINS:
