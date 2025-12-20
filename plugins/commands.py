@@ -512,6 +512,22 @@ Buy subscription for ad-free direct files!
         
     elif data.startswith("files"):
         user = message.from_user.id
+        
+        # Check verification first for non-premium users
+        if not await db.has_premium_access(user):
+            if not await check_verification(client, user):
+                btn = [[ 
+                    InlineKeyboardButton("✅ Click Here To Verify", url=await get_token(client, user, f"https://telegram.me/{temp.U_NAME}?start="))
+                ],[
+                    InlineKeyboardButton("ℹ️ How To Verify", url=VERIFY_TUTORIAL)
+                ]]
+                await message.reply_text(
+                    text="<b>🔐 You Need To Verify First!\n\n✅ Click the button below to verify and get your files.\n\n⏰ After verification, click on the file button again.</b>",
+                    reply_markup=InlineKeyboardMarkup(btn),
+                    parse_mode=enums.ParseMode.HTML
+                )
+                return
+        
         if temp.SHORT.get(user)==None:
             await message.reply_text(text="<b>Please Search Again in Group</b>")
         else:
